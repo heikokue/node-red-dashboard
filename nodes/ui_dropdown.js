@@ -31,8 +31,11 @@ module.exports = function(RED) {
         }
         control.options = config.options;
 
-        var emitOptions;
-        var savedtopic;
+        var emitOptions = { value:undefined };
+
+        node.on("input", function(msg) {
+            node.topi = msg.topic;
+        });
 
         var done = ui.add({
             node: node,
@@ -72,14 +75,14 @@ module.exports = function(RED) {
                                 break;
                             }
                             case 'string': {
-                                emitOptions.newOptions.push({label:opt, value:opt});
+                                emitOptions.newOptions.push({label:opt, value:opt, type:"string"});
                                 break;
                             }
                             case 'object': {
                                 // assuming object of {label:value}
                                 for (var m in opt) {
                                     if (opt.hasOwnProperty(m)) {
-                                        emitOptions.newOptions.push({label:m, value:opt[m]});
+                                        emitOptions.newOptions.push({label:m, value:opt[m], type:typeof(opt[m])});
                                     }
                                 }
                                 break;
@@ -106,13 +109,15 @@ module.exports = function(RED) {
                     }
                 }
 
-                if (msg.hasOwnProperty("topic")) { savedtopic = msg.topic; }
-
                 if (msg.hasOwnProperty("payload")) {
+                    if (node.multiple) {
+                        if (typeof msg.payload === "string") {
+                            msg.payload = msg.payload.split(',');
+                        }
+                    }
                     emitOptions.value = msg.payload;
                     control.value = emitOptions.value;
-                    delete emitOptions._dontSend;
-                    if (!node.pt) { delete emitOptions.value; }
+                    delete msg._dontSend;
                     return emitOptions;
                 }
                 // we do not overide payload here due to 'opt.emitOnlyNewValues' in ui.js
@@ -128,27 +133,37 @@ module.exports = function(RED) {
             convertBack: function (msg) {
                 var val = node.multiple ? [] : "";
                 var m = RED.util.cloneMessage(msg);
+                var mm = (m.hasOwnProperty("id")) ? m.value : m;
                 for (var i=0; i<control.options.length; i++) {
                     if (!node.multiple) {
-                        delete m["$$mdSelectId"]
-                        if (JSON.stringify(control.options[i].value) === JSON.stringify(m)) {
+                        delete m["$$mdSelectId"];
+                        if (JSON.stringify(control.options[i].value) == JSON.stringify(mm)) {
                             val = control.options[i].value;
-                            if (typeof control.options[i].value === "string" && control.options[i].type !== "str") {
+                            if (typeof val === "string" && control.options[i].type !== "str") {
                                 try { val = JSON.parse(val); }
                                 catch(e) {}
                             }
                             break;
                         }
                     }
-                    else if (node.multiple) {
-                        m.map(x => delete x["$$mdSelectId"])
-                        if (Array.isArray(m) && JSON.stringify(m).indexOf(JSON.stringify(control.options[i].value)) !== -1) {
-                            var v = control.options[i].value;
-                            if (typeof control.options[i].value === "string" && control.options[i].type !== "str") {
-                                try { v = JSON.parse(v); }
-                                catch(e) {}
+                    else if (node.multiple && mm !== null) {
+                        if (!Array.isArray(mm)) {
+                            if (mm.hasOwnProperty("value")) { mm = mm.value; }
+                            // if (typeof m === "string") { m = [ m ]; }
+                            if (mm == null) { mm = []; }
+                            else { mm = [ mm ]; }
+                        }
+                        mm.map(x => delete x["$$mdSelectId"])
+                        for (var j = 0; j < mm.length; j++) {
+                            if (JSON.stringify(control.options[i].value) === JSON.stringify(mm[j])) {
+                                var v = control.options[i].value;
+                                if (typeof v === "string" && control.options[i].type !== "str") {
+                                    try { v = JSON.parse(v); }
+                                    catch(e) {}
+                                }
+                                val.push(v);
+                                break;
                             }
-                            val.push(v);
                         }
                     }
                 }
@@ -157,14 +172,14 @@ module.exports = function(RED) {
 
             beforeSend: function (msg) {
                 if (msg.payload === undefined) { msg.payload = []; }
+                if (msg.payload === "") { msg._dontSend = true; }
                 if (msg._dontSend) {
                     delete msg.options;
                     msg.payload = emitOptions.value;
-                    delete msg._dontSend;
                 }
-                msg.topic = config.topic || msg.topic || savedtopic;
-                if (msg.topic === undefined) { delete msg.topic; }
-                if (msg.payload === null) { node.status({}); }
+                var t = RED.util.evaluateNodeProperty(config.topic,config.topicType || "str",node,msg) || node.topi;
+                if (t) { msg.topic = t; }
+                if (msg.payload === null || msg._dontSend) { node.status({}); }
                 else {
                     var stat = "";
                     if (Array.isArray(msg.payload)) { stat = msg.payload.length + " items"; }

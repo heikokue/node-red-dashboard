@@ -20,12 +20,14 @@
       "checkbox": "Checkbox",
       "switch": "Switch",
       "date": "Date",
+      "time": "Time",
       "element": "element",
       "buttons": "Buttons",
       "submitButtonText": "submit button text",
       "cancelButtonText": "cancel button text",
       "topic": "Topic",
-      "optionalMsgTopic": "optional msg.topic"
+      "optionalMsgTopic": "optional msg.topic",
+      "splitLayout":"Place the form elements in two columns"
     }
   }
 }

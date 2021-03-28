@@ -243,7 +243,7 @@ function add(opt) {
                 }
             }
 
-            // if label, format or color field is set to a msg property, emit that as well
+            // if label, format, color, units, tooltip or icon fields are set to a msg property, emit that as well
             addField("label");
             addField("format");
             addField("color");
@@ -265,7 +265,7 @@ function add(opt) {
                 msg.payload = opt.convertBack(fullDataset);
                 msg = opt.beforeSend(msg) || msg;
                 //if (settings.verbose) { console.log("UI-SEND",JSON.stringify(msg)); }
-                opt.node.send(msg);
+                if (!msg._dontSend) { opt.node.send(msg); }
             }
         }
     });
@@ -370,7 +370,7 @@ function init(server, app, log, redSettings) {
     if (typeof uiSettings.ioMiddleware === "function") {
         io.use(uiSettings.ioMiddleware);
     } else if (Array.isArray(uiSettings.ioMiddleware)) {
-        uiSettings.ioMiddleware.forEach(ioMiddleware => {
+        uiSettings.ioMiddleware.forEach(function (ioMiddleware) {
             io.use(ioMiddleware);
         });
     } else {

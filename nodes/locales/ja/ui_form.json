@@ -20,12 +20,14 @@
       "checkbox": "チェックボックス",
       "switch": "スイッチ",
       "date": "日付",
+      "time": "時間",
       "element": "要素",
       "buttons": "ボタン",
       "submitButtonText": "送信ボタンの文字列",
       "cancelButtonText": "キャンセルボタンの文字列",
       "topic": "トピック",
-      "optionalMsgTopic": "任意のmsg.topic"
+      "optionalMsgTopic": "任意のmsg.topic",
+      "splitLayout": "フォーム要素を2列に配置"
     }
   }
 }

@@ -1,9 +1,50 @@
-### 2.27.0-beta: Maintenance Release
+### 2.28.2: Maintenance Release
+
+**Fixes**
+
+ - Fix empty dropdown causing crash on select. PR #686
+ - Fix button not sending blank string. Issue #687
+ - Fix dropdown not returning numbers of type string. Issue #691
+
+### 2.28.1: Maintenance Release
+
+**Fixes**
+
+ - Fix ui-form sizing issue.
+
+### 2.28.0: Milestone Release
+
+**Enhancements**
+
+ - Add two column option to ui_form widget. PR #680
+ - Let topic setting be a typed input for nodes that output topic.
+
+**Fixes**
+
+ - Fix msg.vol for tts out
+ - Fix dropdown again to display input value when in not passing though mode. Issue #675
+ - Fix dropdown to allow clearing/resetting by sending an empty message (part of fix above)
+ - Add option to switch custom icons to animate (a bit) - works with more icon types now.
+
+### 2.27.1: Maintenance Release
+
+**Fixes**
+
+ - Fix CSS for layout grid to render better for some browsers
+ - Add time picker to ui_form options.
+ - Add better German translations. PR #673
+
+### 2.27.0: Milestone Release
 
 **Enhancements**
 
  - Let user configured middleware be an array. PR #664
- - Let polar area chart have diffferent colours per series item. PR #662
+ - Let polar area chart have different colours per series item. PR #662
+
+**Fixes**
+
+ - Fix dropdown pre-select of multiple options
+ - Fix button text colour - dumb mistake. Issue #670
 
 ### 2.26.2: Maintenance Release
 
